@@ -1,0 +1,24 @@
+.gmTimerApp .container {
+  padding: 60px 15px 0;
+}
+
+.gmStatusText .brief {
+  background-color: #fff;
+}
+
+.gmStatusText .short {
+  background-color: #ffc;
+}
+
+.gmStatusText .medium {
+  background-color: #ff0;
+}
+
+.gmStatusText .long {
+  background-color: #f60;
+}
+
+.gmStatusText .forever {
+  background-color: #f00;
+}
+

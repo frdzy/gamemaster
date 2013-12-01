@@ -1,3 +1,6 @@
+build/
+*.swp
+
 lib-cov
 *.seed
 *.log
