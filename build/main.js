@@ -2,6 +2,20 @@
  * @jsx React.DOM
  */
 
+var formatDigit = function(d) {
+  return (d >= 10) ? '' + d : '0' + d;
+};
+
+var formatTime = function(t) {
+  var date = new Date(t);
+  var parts = [
+    date.getUTCHours(),
+    formatDigit(date.getUTCMinutes()),
+    formatDigit(date.getUTCSeconds())
+  ].filter(function(a) { return a; });
+  return parts.join(':');
+};
+
 var GMTimerHeaderAddPlayer = React.createClass({displayName: 'GMTimerHeaderAddPlayer',
   getInitialState: function() {
     return {
@@ -89,12 +103,6 @@ var GMTimerHeader = React.createClass({displayName: 'GMTimerHeader',
   }
 });
 
-var GMTimerHistory = React.createClass({displayName: 'GMTimerHistory',
-  render: function() {
-    return React.DOM.div(null );
-  }
-});
-
 var GMTimerStatus = React.createClass({displayName: 'GMTimerStatus',
 
   getInitialState: function() {
@@ -113,20 +121,6 @@ var GMTimerStatus = React.createClass({displayName: 'GMTimerStatus',
 
   restartTimer: function() {
     this.interval = setInterval(this.tick);
-  },
-
-  formatDigit: function(d) {
-    return (d >= 10) ? '' + d : '0' + d;
-  },
-
-  formatTime: function(t) {
-    var date = new Date(t);
-    var parts = [
-      date.getUTCHours(),
-      this.formatDigit(date.getUTCMinutes()),
-      this.formatDigit(date.getUTCSeconds())
-    ].filter(function(a) { return a; });
-    return parts.join(':');
   },
 
   tick: function() {
@@ -155,14 +149,14 @@ var GMTimerStatus = React.createClass({displayName: 'GMTimerStatus',
       ? currentPlayer.name
       : '';
     var totalTime = (currentPlayer)
-      ? '(' + this.formatTime(currentPlayer.totalTime + this.state.elapsedTime) + ')'
+      ? '(' + formatTime(currentPlayer.totalTime + this.state.elapsedTime) + ')'
       : '';
     return (
       React.DOM.div(null, 
         React.DOM.p(null, '>',name + ' ' + totalTime),
         React.DOM.h1( {className:"gmStatusText"}, 
           React.DOM.span( {className:this.getStatusClass(this.state.elapsedTime)}, 
-            this.formatTime(this.state.elapsedTime)
+            formatTime(this.state.elapsedTime)
           )
         )
       )
@@ -178,6 +172,32 @@ var GMTimerNext = React.createClass({displayName: 'GMTimerNext',
     return this.transferPropsTo(
       React.DOM.a( {className:buttonClass}, 
         this.props.started ? 'Next' : 'Start'
+      )
+    );
+  }
+});
+
+var GMTimerHistory = React.createClass({displayName: 'GMTimerHistory',
+  render: function() {
+    var rows = this.props.players.map(function(player) {
+      return (
+        React.DOM.tr(null, 
+          React.DOM.td(null, player.name),
+          React.DOM.td(null, formatTime(player.totalTime))
+        )
+      );
+    });
+    return (
+      React.DOM.table( {className:"table"}, 
+        React.DOM.thead(null, 
+          React.DOM.tr(null, 
+            React.DOM.th(null, "Name"),
+            React.DOM.th(null, "Total Time")
+          )
+        ),
+        React.DOM.tbody( {className:".table-striped"}, 
+          rows
+        )
       )
     );
   }
@@ -275,8 +295,12 @@ var GMTimerApp = React.createClass({displayName: 'GMTimerApp',
             {started:this.state.started,
             disabled:!this.state.players.length,
             onClick:this.next}
+          ),
+          GMTimerHistory(
+            {players:this.state.players,
+            currentIndex:this.state.currentIndex}
           )
-          )
+        )
       )
     );
   }
