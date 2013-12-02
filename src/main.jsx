@@ -189,17 +189,74 @@ var GMTimerHistory = React.createClass({
       );
     });
     return (
-      <table className="table">
+      <table className="table table-striped">
         <thead>
           <tr>
             <th>Name</th>
             <th>Total Time</th>
           </tr>
         </thead>
-        <tbody className=".table-striped">
+        <tbody>
           {rows}
         </tbody>
       </table>
+    );
+  }
+});
+
+var GMTimerDie = React.createClass({
+  render: function() {
+    return (
+      <a href="#" class="btn btn-success btn-lg">
+        {this.props.value}
+      </a>
+    );
+  }
+});
+
+var GMTimerDice = React.createClass({
+  makeRand: function(max) {
+    return Math.floor(Math.random() * max) + 1;
+  },
+
+  makeRands: function(max) {
+    return [
+      this.makeRand(this.props.max),
+      this.makeRand(this.props.max)
+    ];
+  },
+
+  roll: function(max) {
+    this.setState({
+      values: this.makeRands(this.props.max)
+    });
+  },
+
+  getInitialState: function() {
+    return {
+      values: this.makeRands(this.props.max)
+    };
+  },
+
+  render: function() {
+    return (
+      <div>
+        <div>
+          {
+            this.state.values.map(function(v) {
+              return <GMTimerDie value={v} />;
+            })
+          }
+        </div>
+        <h3>
+          Roll:
+          {
+            this.state.values.reduce(function(a, b) {
+              return a + b;
+            }, 0)
+          }
+        </h3>
+      </div>
     );
   }
 });
@@ -278,6 +335,7 @@ var GMTimerApp = React.createClass({
       this.startGame();
     }
     this.updateTotalTimes();
+    this.refs.gmDice.roll();
   },
 
   render: function() {
@@ -287,20 +345,35 @@ var GMTimerApp = React.createClass({
           onAddPlayer={this.onAddPlayer}
         />
         <div className="container">
-          <GMTimerStatus
-            ref="gmTimer"
-            lastNext={this.state.lastNext}
-            currentPlayer={this.getCurrentPlayer()}
-          />
-          <GMTimerNext
-            started={this.state.started}
-            disabled={!this.state.players.length}
-            onClick={this.next}
-          />
-          <GMTimerHistory
-            players={this.state.players}
-            currentIndex={this.state.currentIndex}
-          />
+          <div className="row">
+            <div className="col-md-6">
+              <GMTimerStatus
+                ref="gmTimer"
+                lastNext={this.state.lastNext}
+                currentPlayer={this.getCurrentPlayer()}
+              />
+              <GMTimerNext
+                started={this.state.started}
+                disabled={!this.state.players.length}
+                onClick={this.next}
+              />
+            </div>
+            <div className="col-md-6">
+              { (this.state.started)
+                ? <GMTimerDice
+                    ref="gmDice"
+                    max={6}
+                  />
+                : null
+              }
+            </div>
+            <div className="col-md-12">
+              <GMTimerHistory
+                players={this.state.players}
+                currentIndex={this.state.currentIndex}
+              />
+            </div>
+          </div>
         </div>
       </div>
     );

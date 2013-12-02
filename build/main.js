@@ -188,15 +188,71 @@ var GMTimerHistory = React.createClass({displayName: 'GMTimerHistory',
       );
     });
     return (
-      React.DOM.table( {className:"table"}, 
+      React.DOM.table( {className:"table table-striped"}, 
         React.DOM.thead(null, 
           React.DOM.tr(null, 
             React.DOM.th(null, "Name"),
             React.DOM.th(null, "Total Time")
           )
         ),
-        React.DOM.tbody( {className:".table-striped"}, 
+        React.DOM.tbody(null, 
           rows
+        )
+      )
+    );
+  }
+});
+
+var GMTimerDie = React.createClass({displayName: 'GMTimerDie',
+  render: function() {
+    return (
+      React.DOM.a( {href:"#", className:"btn btn-success btn-lg"}, 
+        this.props.value
+      )
+    );
+  }
+});
+
+var GMTimerDice = React.createClass({displayName: 'GMTimerDice',
+  makeRand: function(max) {
+    return Math.floor(Math.random() * max) + 1;
+  },
+
+  makeRands: function(max) {
+    return [
+      this.makeRand(this.props.max),
+      this.makeRand(this.props.max)
+    ];
+  },
+
+  roll: function(max) {
+    this.setState({
+      values: this.makeRands(this.props.max)
+    });
+  },
+
+  getInitialState: function() {
+    return {
+      values: this.makeRands(this.props.max)
+    };
+  },
+
+  render: function() {
+    return (
+      React.DOM.div(null, 
+        React.DOM.div(null, 
+          
+            this.state.values.map(function(v) {
+              return GMTimerDie( {value:v} );
+            })
+          
+        ),
+        React.DOM.h3(null, 
+" Roll: ",          
+            this.state.values.reduce(function(a, b) {
+              return a + b;
+            }, 0)
+          
         )
       )
     );
@@ -277,6 +333,7 @@ var GMTimerApp = React.createClass({displayName: 'GMTimerApp',
       this.startGame();
     }
     this.updateTotalTimes();
+    this.refs.gmDice.roll();
   },
 
   render: function() {
@@ -286,19 +343,34 @@ var GMTimerApp = React.createClass({displayName: 'GMTimerApp',
           {onAddPlayer:this.onAddPlayer}
         ),
         React.DOM.div( {className:"container"}, 
-          GMTimerStatus(
-            {ref:"gmTimer",
-            lastNext:this.state.lastNext,
-            currentPlayer:this.getCurrentPlayer()}
-          ),
-          GMTimerNext(
-            {started:this.state.started,
-            disabled:!this.state.players.length,
-            onClick:this.next}
-          ),
-          GMTimerHistory(
-            {players:this.state.players,
-            currentIndex:this.state.currentIndex}
+          React.DOM.div( {className:"row"}, 
+            React.DOM.div( {className:"col-md-6"}, 
+              GMTimerStatus(
+                {ref:"gmTimer",
+                lastNext:this.state.lastNext,
+                currentPlayer:this.getCurrentPlayer()}
+              ),
+              GMTimerNext(
+                {started:this.state.started,
+                disabled:!this.state.players.length,
+                onClick:this.next}
+              )
+            ),
+            React.DOM.div( {className:"col-md-6"}, 
+               (this.state.started)
+                ? GMTimerDice(
+                    {ref:"gmDice",
+                    max:6}
+                  )
+                : null
+              
+            ),
+            React.DOM.div( {className:"col-md-12"}, 
+              GMTimerHistory(
+                {players:this.state.players,
+                currentIndex:this.state.currentIndex}
+              )
+            )
           )
         )
       )
