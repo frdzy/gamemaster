@@ -1,4 +1,4 @@
-build/
+.module-cache
 *.swp
 
 lib-cov
